@@ -42,6 +42,15 @@ describe("File / sources", () => {
     expect(store.files.find((f) => f.id === b.id)?.folderId).toBeNull();
   });
 
+  it("does not wipe title when only toggling selected", () => {
+    const store = new GaotaiStore();
+    const board = store.createBoard("Chaos");
+    const file = store.addDocument(board.id, "file甲", "正文");
+    store.updateFile(file.id, { selected: true });
+    expect(store.requireFile(file.id).title).toBe("file甲");
+    expect(store.requireFile(file.id).selected).toBe(true);
+  });
+
   it("does not invent a kanban collection", () => {
     const store = new GaotaiStore();
     expect((store as unknown as { kanban?: unknown }).kanban).toBeUndefined();

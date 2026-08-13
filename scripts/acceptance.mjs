@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import { existsSync } from "fs";
 
 const PORT = process.env.PORT || "3000";
@@ -31,6 +31,11 @@ async function main() {
   if (!existsSync("node_modules/playwright")) {
     throw new Error("playwright is not installed");
   }
+  try {
+    execSync(`fuser -k ${PORT}/tcp`, { stdio: "ignore" });
+  } catch {
+    /* port was free */
+  }
   const server = spawn("npx", ["next", "dev", "-p", PORT], {
     stdio: "inherit",
     env: {
@@ -44,9 +49,18 @@ async function main() {
   process.on("exit", stop);
   try {
     await waitForServer();
-    await run("npx", ["cucumber-js", "features/gaotai-v1.feature"], {
-      env: { ...process.env, BASE_URL: BASE },
-    });
+    await run(
+      "node",
+      [
+        "--require",
+        "./features/support/register-zh.cjs",
+        "./node_modules/@cucumber/cucumber/bin/cucumber.js",
+        "features/gaotai-v1.feature",
+      ],
+      {
+        env: { ...process.env, BASE_URL: BASE },
+      },
+    );
   } finally {
     stop();
   }

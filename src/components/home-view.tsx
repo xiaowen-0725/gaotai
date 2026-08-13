@@ -120,7 +120,7 @@ export function WriteDialog({ boardId, onClose }: { boardId: string; onClose: ()
             </button>
           ))}
         </div>
-        <button className="ghost" onClick={onClose}>关闭</button>
+        <button className="ghost" data-testid="close-write" onClick={onClose}>关闭</button>
       </div>
     </div>
   );

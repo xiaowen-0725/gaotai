@@ -100,13 +100,19 @@ export function Composer({
           </button>
           {addOpen ? (
             <div className="menu" data-testid="add-menu" style={{ top: 40, left: 0 }}>
-              <button onClick={() => fileRef.current?.click()}>
+              <button onClick={() => { setAddOpen(false); fileRef.current?.click(); }}>
                 <IconPaperclip /> Add from files
               </button>
-              <button onClick={() => closedStub(showToast)}>
+              <button onClick={() => { setAddOpen(false); closedStub(showToast); }}>
                 <IconBoards /> 从稿台已有 file 加入
               </button>
-              <button className="toggle" onClick={() => closedStub(showToast)}>
+              <button
+                className="toggle"
+                data-testid="use-browser"
+                onClick={() => {
+                  closedStub(showToast);
+                }}
+              >
                 <IconWeb /> Use browser
                 <span data-testid="use-browser-toggle">{browserOn ? "On" : "Off"}</span>
                 <input
@@ -119,7 +125,7 @@ export function Composer({
                   aria-label="Use browser"
                 />
               </button>
-              <button data-testid="add-connectors" onClick={() => closedStub(showToast)}>
+              <button data-testid="add-connectors" onClick={() => { setAddOpen(false); closedStub(showToast); }}>
                 <IconNodes /> Add connectors
               </button>
             </div>

@@ -49,7 +49,7 @@ export function Workspace({ boardId }: { boardId: string }) {
   const tasks = state.tasks.filter((t) => t.boardId === boardId);
   const highlights = state.highlights.filter((h) => h.fileId === file?.id);
 
-  if (!board) return <div className="page">Board 不存在</div>;
+  if (!board) return <div className="page">加载中…</div>;
 
   function openFile(id: string) {
     setSeg("files");
@@ -364,7 +364,7 @@ function FileCanvas({
       {shareUrl ? (
         <p data-testid="share-url">{shareUrl}</p>
       ) : null}
-      <div className="sr-only">没有独立笔记对象 没有看板 不是把这篇长文改写成小红书</div>
+      <div className="sr-only">稿台文档画布</div>
     </div>
   );
 }

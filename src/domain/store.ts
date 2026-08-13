@@ -188,7 +188,10 @@ export class GaotaiStore {
 
   updateFile(id: string, patch: Partial<Pick<MaterialFile, "title" | "body" | "selected" | "folderId">>) {
     const file = this.requireFile(id);
-    Object.assign(file, patch);
+    if (patch.title !== undefined) file.title = patch.title;
+    if (patch.body !== undefined) file.body = patch.body;
+    if (patch.selected !== undefined) file.selected = patch.selected;
+    if (patch.folderId !== undefined) file.folderId = patch.folderId;
     return file;
   }
 

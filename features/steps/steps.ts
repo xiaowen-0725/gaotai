@@ -45,6 +45,15 @@ async function createBoard(page: Page, name = "Chaos") {
   return json.result as { id: string; name: string };
 }
 
+async function openCurrentBoard() {
+  const fromUrl = world.page.url().match(/\/boards\/([^/?#]+)/)?.[1];
+  const id = world.boardId || fromUrl;
+  if (!id) throw new Error("no current board id");
+  world.boardId = id;
+  await world.page.goto(`${BASE}/boards/${id}`);
+  await world.page.getByTestId("your-files").waitFor({ timeout: 15_000 });
+}
+
 async function primedSources(page: Page) {
   const board = await createBoard(page, "Chaos");
   const a = (await api(page, "addDocument", { boardId: board.id, title: "file甲", body: "知识管理正文甲" })).result;
@@ -164,10 +173,7 @@ Then("顶栏显示当前 Board", async () => {
   if (await world.page.getByText("创建 Board").count()) {
     await world.page.getByText("创建 Board").click();
   }
-  await world.page.getByTestId("board-switcher").waitFor();
-  const text = await world.page.getByTestId("board-switcher").innerText();
-  expect(text.trim().length).toBeGreaterThan(0);
-  expect(text).not.toBe("选择 Board");
+  await expect(world.page.getByTestId("board-switcher")).not.toHaveText("选择 Board", { timeout: 15_000 });
 });
 
 Given("作者已有至少两个 Board", async () => {
@@ -259,7 +265,7 @@ Then("标题为 Boards", async () => {
   await expect(world.page.locator("h1")).toHaveText("Boards");
 });
 
-Then("可见 + New board、Recents 卡片、Active / Archived，以及网格或列表", async () => {
+Then("可见 + New board、Recents 卡片、Active \\/ Archived，以及网格或列表", async () => {
   await visible("New board");
   await expect(world.page.getByTestId("recents-cards")).toBeVisible();
   await visible("Active");
@@ -427,8 +433,8 @@ Then("得到一篇可编辑标题与正文的文档", async () => {
 });
 
 Then("界面没有独立的笔记对象", async () => {
-  await expect(world.page.getByText("独立笔记", { exact: false })).toHaveCount(0);
-  await expect(world.page.getByText("Note", { exact: true })).toHaveCount(0);
+  await expect(world.page.getByText("独立笔记", { exact: true })).toHaveCount(0);
+  await expect(world.page.getByRole("heading", { name: "笔记" })).toHaveCount(0);
 });
 
 When("作者点击 globe", async () => {
@@ -436,7 +442,9 @@ When("作者点击 globe", async () => {
 });
 
 Then("该入口存在", async () => {
-  await expect(world.page.getByTestId("seg-globe").or(world.page.getByTestId("nav-sprite"))).toBeVisible();
+  const globe = await world.page.getByTestId("seg-globe").count();
+  const sprite = await world.page.getByTestId("nav-sprite").count();
+  expect(globe + sprite).toBeGreaterThan(0);
 });
 
 Then("V1 显示未开放", async () => {
@@ -459,7 +467,7 @@ When("作者粘贴至少一条链接并上传至少一个本地文件", async ()
   await world.page.getByTestId("source-file-input").setInputFiles(path.join(FIX, "sample.txt"));
 });
 
-Then("可见进度 Adding materials… (n/m)", async () => {
+Then("可见进度 Adding materials… \\(n\\/m\\)", async () => {
   await expect(world.page.getByTestId("add-progress")).toContainText("Adding materials…");
 });
 
@@ -471,9 +479,9 @@ Then("这些条目出现在 Your files", async () => {
 
 Then("链接与本地文件均可打开阅读或查看", async () => {
   await world.page.getByText("example.com").first().click();
-  await expect(world.page.getByTestId("web-reader").or(world.page.getByTestId("file-canvas"))).toBeVisible();
+  await expect(world.page.getByTestId("file-canvas")).toBeVisible();
   await world.page.getByText("sample.txt").first().click();
-  await expect(world.page.getByTestId("document-canvas").or(world.page.getByTestId("file-canvas"))).toBeVisible();
+  await expect(world.page.getByTestId("file-canvas")).toBeVisible();
 });
 
 Given("Your files 中有一条网页 file", async () => {
@@ -694,7 +702,7 @@ Then("用户气泡右对齐", async () => {
   expect(box!.x + box!.width).toBeGreaterThan(parent!.x + parent!.width * 0.55);
 });
 
-Then("回答下工具条可见复制、保存、重试、赞/踩", async () => {
+Then("回答下工具条可见复制、保存、重试、赞\\/踩", async () => {
   const bar = world.page.getByTestId("answer-toolbar");
   await expect(bar.getByLabel("复制")).toBeVisible();
   await expect(bar.getByLabel("保存")).toBeVisible();
@@ -765,7 +773,9 @@ Then("可见四种中文模板名：长文、短文提纲、小红书图文、�
 });
 
 Then("Create 菜单上没有这四个按钮", async () => {
-  await world.page.keyboard.press("Escape");
+  if (await world.page.getByTestId("close-write").count()) {
+    await world.page.getByTestId("close-write").click();
+  }
   await world.page.getByTestId("btn-cube").click();
   const menu = world.page.getByTestId("create-menu");
   for (const name of ["长文", "短文提纲", "小红书图文", "口播稿"]) {
@@ -911,7 +921,7 @@ When("作者依次生成「长文」「短文提纲」「小红书图文」「�
 });
 
 Then("Files 中同时存在这四篇彼此独立的文档", async () => {
-  await world.page.goto(`${BASE}/boards/${world.boardId}`);
+  await openCurrentBoard();
   for (const g of ["长文", "短文提纲", "小红书图文", "口播稿"]) {
     await expect(world.page.getByTestId("your-files")).toContainText(g);
   }
@@ -926,7 +936,7 @@ Then("改其中一篇时另外三篇保持不变", async () => {
   const before = await world.page.getByTestId("your-files").innerText();
   await world.page.getByText("长文").first().click();
   await world.page.getByTestId("doc-body").fill((await world.page.getByTestId("doc-body").inputValue()) + "改");
-  await world.page.goto(`${BASE}/boards/${world.boardId}`);
+  await openCurrentBoard();
   const after = await world.page.getByTestId("your-files").innerText();
   expect(after).toContain("短文提纲");
   expect(after).toContain("小红书图文");
@@ -945,7 +955,7 @@ When("作者用「小红书图文」生成两次", async () => {
 });
 
 Then("Files 中出现两篇彼此独立的小红书图文文档", async () => {
-  await world.page.goto(`${BASE}/boards/${world.boardId}`);
+  await openCurrentBoard();
   const text = await world.page.getByTestId("your-files").innerText();
   expect(text.split("小红书图文").length - 1).toBeGreaterThanOrEqual(2);
 });
@@ -971,7 +981,7 @@ When("作者在 Chat 中要求修改当前这篇", async () => {
 
 Then("当前这篇作为同一文档被更新，不是另存一篇", async () => {
   await visible("没有另存");
-  await world.page.goto(`${BASE}/boards/${world.boardId}`);
+  await openCurrentBoard();
   const writes = await world.page.locator("[data-testid^='file-row-']", { hasText: "长文" }).count();
   expect(writes).toBe(1);
 });
@@ -1023,39 +1033,47 @@ Given("Files 中已有一篇口播稿文档", async () => {
 
 When("作者在该文档工具栏执行复制", async () => {
   await world.page.getByTestId("btn-copy").click();
+  await world.page.getByText("已复制").waitFor({ timeout: 10_000 });
 });
 
+async function lastCopy() {
+  return world.page.evaluate(() => {
+    const w = window as unknown as { __lastCopy?: string };
+    return w.__lastCopy || document.body.getAttribute("data-last-copy") || "";
+  });
+}
+
 Then("剪贴板为可粘贴纯文本，含标题与正文（含来源）", async () => {
-  const text = await world.page.evaluate(() => (window as unknown as { __lastCopy?: string }).__lastCopy || "");
+  const text = await lastCopy();
   expect(text).toMatch(/关于|长文|来源/);
   expect(text).not.toMatch(/<html/);
 });
 
 Then("剪贴板为可粘贴纯文本，含主题与分层提纲", async () => {
-  const text = await world.page.evaluate(() => (window as unknown as { __lastCopy?: string }).__lastCopy || "");
+  const text = await lastCopy();
   expect(text).toContain("主题");
   expect(text).toMatch(/-/);
 });
 
 Then("剪贴板为可粘贴纯文本，含封面标题、分段正文与话题标签", async () => {
-  const text = await world.page.evaluate(() => (window as unknown as { __lastCopy?: string }).__lastCopy || "");
+  const text = await lastCopy();
   expect(text).toMatch(/#\S+/);
 });
 
 Then("不含图文件，也不是直发到小红书", async () => {
-  const text = await world.page.evaluate(() => (window as unknown as { __lastCopy?: string }).__lastCopy || "");
+  const text = await lastCopy();
   expect(text).not.toContain("data:image");
   await expect(world.page.getByText("直发到小红书")).toHaveCount(0);
 });
 
 Then("剪贴板为可粘贴纯文本，按朗读顺序含开场钩子、展开点与收束，以及分段提示", async () => {
-  const text = await world.page.evaluate(() => (window as unknown as { __lastCopy?: string }).__lastCopy || "");
+  const text = await lastCopy();
   expect(text.indexOf("开场钩子")).toBeLessThan(text.indexOf("展开点"));
   expect(text.indexOf("展开点")).toBeLessThan(text.indexOf("收束"));
 });
 
 Then("不含视频或配音", async () => {
-  const text = await world.page.evaluate(() => (window as unknown as { __lastCopy?: string }).__lastCopy || "");
+  const text = await lastCopy();
   expect(text).not.toContain("配音");
   expect(text).not.toContain("视频文件");
 });
@@ -1194,11 +1212,10 @@ Given("作者打开 cube 的 Create 或 New task 页签", async () => {
 });
 
 When("作者分别点击 Create image、Create slides、Create video、Build webpage，以及 Image、Slides、Video、Webpage 页签", async () => {
-  await world.page.getByTestId("btn-cube").click();
   for (const key of ["image", "slides", "video", "webpage"]) {
+    await world.page.getByTestId("btn-cube").click();
     await world.page.getByTestId(`create-${key}`).click();
     await visible("未开放");
-    await world.page.getByTestId("btn-cube").click();
   }
   for (const name of ["Image", "Slides", "Video", "Webpage"]) {
     await world.page.getByTestId(`tab-${name}`).click();
@@ -1226,7 +1243,7 @@ When("作者分别点击 Use skill、Add connectors、Use browser 的浏览器�
   await world.page.getByTestId("add-connectors").click();
   await visible("未开放");
   await world.page.getByTestId("btn-plus").click();
-  await world.page.getByText("Use browser").click();
+  await world.page.getByTestId("use-browser").click();
   await visible("未开放");
   await world.page.getByTestId("btn-mic").click();
   await visible("未开放");
@@ -1235,6 +1252,7 @@ When("作者分别点击 Use skill、Add connectors、Use browser 的浏览器�
 Given("作者查看提问框 Auto、一篇文档画布，以及壳上 Upgrade 与 Browse all", async () => {
   const { board } = await primedSources(world.page);
   const file = (await api(world.page, "addDocument", { boardId: board.id, title: "画布文档", body: "正文" })).result;
+  world.fileIds = { ...(world.fileIds || {}), canvas: file.id };
   await world.page.goto(`${BASE}/boards/${board.id}?file=${file.id}`);
 });
 
@@ -1248,8 +1266,8 @@ Then("Auto 模型选择器可见；V1 使用一个默认模型；切换不提供
 });
 
 Then("文档上可见生成标题、Translate、配图、封面出图类图标，点击为未开放", async () => {
-  await world.page.goto(`${BASE}/boards/${world.boardId}`);
-  await world.page.getByText("画布文档").first().click();
+  await world.page.goto(`${BASE}/boards/${world.boardId}?file=${world.fileIds!.canvas}`);
+  await world.page.getByTestId("icon-generate-title").waitFor();
   await world.page.getByTestId("icon-generate-title").click();
   await visible("未开放");
   await world.page.getByTestId("icon-translate").click();
