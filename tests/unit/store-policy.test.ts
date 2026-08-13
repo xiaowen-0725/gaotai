@@ -25,8 +25,12 @@ describe("store policy", () => {
     const store = new GaotaiStore();
     const a = store.createBoard("A");
     const b = store.createBoard("B");
-    expect(store.currentBoardId).toBe(b.id);
+    const c = store.createBoard("C");
+    expect(store.currentBoardId).toBe(c.id);
     store.deleteBoard(a.id);
+    expect(store.currentBoardId).toBe(c.id);
+    expect(store.currentBoardId).not.toBe(b.id);
+    store.deleteBoard(c.id);
     expect(store.currentBoardId).toBe(b.id);
     store.deleteBoard(b.id);
     expect(store.currentBoardId).toBeNull();
@@ -157,4 +161,109 @@ describe("store policy", () => {
     expect(danglingBoard.getShare(first.token)).toBeNull();
     expect(store.copyFile(file.id)).toBe("甲\n\n正文");
   });
+
+  it("deletes only the target board's files, highlights, tasks, folders and shares", () => {
+    const store = new GaotaiStore();
+    const keep = store.createBoard("Keep");
+    const drop = store.createBoard("Drop");
+    const keepFile = store.addDocument(keep.id, "留");
+    const dropFile = store.addDocument(drop.id, "删");
+    store.updateFile(keepFile.id, { selected: true });
+    store.updateFile(dropFile.id, { selected: true });
+    const keepHl = store.addHighlight(keepFile.id, "留摘");
+    const dropHl = store.addHighlight(dropFile.id, "删摘");
+    const keepFolder = store.createFolder(keep.id, "留夹");
+    const dropFolder = store.createFolder(drop.id, "删夹");
+    const keepTask = store.startChatTask(keep.id, "留聊");
+    const dropTask = store.startChatTask(drop.id, "删聊");
+    const keepShare = store.createShare(keepFile.id);
+    const dropShare = store.createShare(dropFile.id);
+    store.setCurrentBoard(keep.id);
+    store.deleteBoard(drop.id);
+    expect(store.currentBoardId).toBe(keep.id);
+    expect(store.boards.map((b) => b.id)).toEqual([keep.id]);
+    expect(store.files.map((f) => f.id)).toEqual([keepFile.id]);
+    expect(store.highlights.map((h) => h.id)).toEqual([keepHl.id]);
+    expect(store.folders.map((f) => f.id)).toEqual([keepFolder.id]);
+    expect(store.tasks.map((t) => t.id)).toEqual([keepTask.id]);
+    expect(store.shareLinks.map((s) => s.token)).toEqual([keepShare.token]);
+    expect(store.getShare(dropShare.token)).toBeNull();
+    expect(store.requireBoard(keep.id).id).toBe(keep.id);
+    expect(store.askChat(keepTask.id, "仍在").text.length).toBeGreaterThan(0);
+    expect(() => store.askChat(dropTask.id, "已删")).toThrow("Task 不存在");
+  });
+
+  it("scopes write sources and chat cites to the current board", () => {
+    const store = new GaotaiStore();
+    const a = store.createBoard("A");
+    const b = store.createBoard("B");
+    const aFile = store.addDocument(a.id, "甲", "正文甲");
+    const bFile = store.addDocument(b.id, "乙", "正文乙");
+    store.updateFile(aFile.id, { selected: true });
+    store.updateFile(bFile.id, { selected: true });
+    const aHl = store.addHighlight(aFile.id, "摘甲");
+    store.addHighlight(bFile.id, "摘乙");
+    const doc = store.generateWrite(a.id, "长文");
+    expect(doc.sourceFileIds).toEqual([aFile.id]);
+    expect(doc.sourceHighlightIds).toEqual([aHl.id]);
+    expect(doc.selected).toBe(false);
+    expect(doc.sourceFileIds).not.toContain(bFile.id);
+    const writeTask = store.tasks.find((t) => t.writeFileId === doc.id);
+    expect(writeTask?.kind).toBe("write");
+    expect(writeTask?.messages).toEqual([]);
+    const task = store.startChatTask(a.id, "问");
+    const answer = store.askChat(task.id, "解释");
+    expect(answer.citedFileIds).toEqual([aFile.id]);
+    expect(answer.citedHighlightIds).toEqual([aHl.id]);
+    expect(answer.role).toBe("assistant");
+    expect(task.messages[0]).toMatchObject({ role: "user", text: "解释" });
+    expect(task.kind).toBe("chat");
+    expect(task.messages[0].id.startsWith("msg-")).toBe(true);
+    expect(answer.id.startsWith("msg-")).toBe(true);
+  });
+
+  it("uses prefixed ids and default flags on new records", () => {
+    const store = new GaotaiStore();
+    const board = store.createBoard("Chaos");
+    expect(board.id.startsWith("board-")).toBe(true);
+    expect(board.archived).toBe(false);
+    const file = store.addDocument(board.id, "甲", "正文");
+    expect(file.id.startsWith("file-")).toBe(true);
+    expect(file.selected).toBe(false);
+    expect(file.sourceFileIds).toEqual([]);
+    expect(file.sourceHighlightIds).toEqual([]);
+    expect(store.addHighlight(file.id, "摘").id.startsWith("hl-")).toBe(true);
+    expect(store.createFolder(board.id, "夹").id.startsWith("folder-")).toBe(true);
+    expect(store.startChatTask(board.id, "聊").id.startsWith("task-")).toBe(true);
+    const write = store.generateWrite(board.id, "长文");
+    expect(store.tasks.find((t) => t.writeFileId === write.id)?.id.startsWith("task-")).toBe(true);
+    const revised = store.askChat(store.startChatTask(board.id, "改").id, "修改", write.id);
+    expect(revised.role).toBe("assistant");
+    expect(revised.citedFileIds).toEqual([write.id]);
+    expect(revised.id.startsWith("msg-")).toBe(true);
+  });
+
+  it("invalidates a share when its board is gone but another board remains", () => {
+    const store = new GaotaiStore();
+    const board = store.createBoard("Chaos");
+    const file = store.addDocument(board.id, "甲", "正文");
+    const share = store.createShare(file.id);
+    const other = new GaotaiStore();
+    other.load({
+      ...store.snapshot(),
+      boards: [{ id: "other", name: "Other", ownerId: "author-1", archived: false, createdAt: "t" }],
+    });
+    expect(other.boards).toHaveLength(1);
+    expect(other.getShare(share.token)).toBeNull();
+  });
+
+  it("ensureBoard keeps the second board when it is current", () => {
+    const store = new GaotaiStore();
+    const a = store.createBoard("A");
+    const b = store.createBoard("B");
+    store.setCurrentBoard(b.id);
+    expect(store.ensureBoard().id).toBe(b.id);
+    expect(store.ensureBoard().id).not.toBe(a.id);
+  });
 });
+

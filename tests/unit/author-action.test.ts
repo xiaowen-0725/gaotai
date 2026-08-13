@@ -24,6 +24,11 @@ describe("author-action adapter", () => {
     runAuthorAction(store, "updateFile", { id: file.id, selected: true });
     expect(store.requireFile(file.id).selected).toBe(true);
     expect(store.requireFile(file.id).title).toBe("甲");
+    runAuthorAction(store, "moveFileToFolder", { fileId: file.id, folderId: folder.id });
+    runAuthorAction(store, "updateFile", { id: file.id, title: "仍在文件夹", selected: "yes" });
+    expect(store.requireFile(file.id).folderId).toBe(folder.id);
+    expect(store.requireFile(file.id).selected).toBe(true);
+    expect(store.requireFile(file.id).title).toBe("仍在文件夹");
   });
 
   it("treats only outcome=failed as a failed transcription", () => {
@@ -55,9 +60,63 @@ describe("author-action adapter", () => {
     runAuthorAction(store, "updateFile", { id: file.id, selected: true });
     const hl = runAuthorAction(store, "addHighlight", { fileId: file.id, text: "摘" }) as { id: string; selected: boolean };
     expect(hl.selected).toBe(true);
-    runAuthorAction(store, "toggleHighlight", { id: hl.id });
+    runAuthorAction(store, "toggleHighlight", { id: hl.id, selected: "nope" });
     expect(store.highlights[0].selected).toBe(false);
+    runAuthorAction(store, "toggleHighlight", { id: hl.id });
+    expect(store.highlights[0].selected).toBe(true);
     const share = runAuthorAction(store, "createShare", { fileId: file.id }) as { token: string };
     expect(share.token.startsWith("share-")).toBe(true);
   });
+
+  it("covers rename, delete, switch, link, write, and chat handlers", () => {
+    const store = new GaotaiStore();
+    const board = runAuthorAction(store, "createBoard", { name: "Chaos" }) as { id: string };
+    const other = runAuthorAction(store, "createBoard", { name: "Keep" }) as { id: string };
+    expect(runAuthorAction(store, "renameBoard", { id: board.id })).toMatchObject({ name: "" });
+    expect(runAuthorAction(store, "renameBoard", { id: board.id, name: "新名称" })).toMatchObject({ name: "新名称" });
+    expect(runAuthorAction(store, "setCurrentBoard", { id: board.id })).toEqual({ ok: true });
+    expect(store.currentBoardId).toBe(board.id);
+    const link = runAuthorAction(store, "addLink", { boardId: board.id, url: "https://example.com/a" }) as { title: string };
+    expect(link.title).toBe("example.com");
+    const links = runAuthorAction(store, "addLinks", {
+      boardId: board.id,
+      text: "https://a.com https://b.com",
+    }) as Array<{ url?: string }>;
+    expect(links.map((item) => item.url)).toEqual(["https://a.com", "https://b.com"]);
+    const local = runAuthorAction(store, "addLocalFile", {
+      boardId: board.id,
+      name: "notes.txt",
+      mime: "text/plain",
+      body: "本地正文",
+      dataUrl: "data:text/plain,x",
+    }) as { body: string; mime?: string; dataUrl?: string };
+    expect(local.body).toBe("本地正文");
+    expect(local.mime).toBe("text/plain");
+    expect(local.dataUrl).toBe("data:text/plain,x");
+    const unnamed = runAuthorAction(store, "addDocument", { boardId: board.id }) as { id: string; title: string; body: string };
+    expect(unnamed.title).toBe("未命名文档");
+    expect(unnamed.body).toBe("");
+    runAuthorAction(store, "updateFile", { id: unnamed.id, title: "只改标题" });
+    expect(store.requireFile(unnamed.id).body).toBe("");
+    expect(store.requireFile(unnamed.id).title).toBe("只改标题");
+    runAuthorAction(store, "updateFile", { id: unnamed.id, title: "改标题", body: "改正文", selected: true });
+    expect(store.requireFile(unnamed.id)).toMatchObject({ title: "改标题", body: "改正文", selected: true });
+    const hl = runAuthorAction(store, "addHighlight", { fileId: unnamed.id, text: "摘" }) as { id: string };
+    runAuthorAction(store, "toggleHighlight", { id: hl.id, selected: true });
+    expect(store.highlights[0].selected).toBe(true);
+    runAuthorAction(store, "toggleHighlight", { id: hl.id, selected: false });
+    expect(store.highlights[0].selected).toBe(false);
+    const write = runAuthorAction(store, "generateWrite", { boardId: board.id, genre: "长文" }) as { writeGenre: string };
+    expect(write.writeGenre).toBe("长文");
+    const task = runAuthorAction(store, "startChat", { boardId: board.id, title: "问" }) as { id: string };
+    const answer = runAuthorAction(store, "askChat", {
+      taskId: task.id,
+      question: "修改当前这篇",
+      currentFileId: write.id,
+    }) as { text: string };
+    expect(answer.text).toContain("没有另存");
+    expect(runAuthorAction(store, "deleteBoard", { id: board.id })).toEqual({ ok: true });
+    expect(store.boards.map((item) => item.id)).toEqual([other.id]);
+  });
 });
+

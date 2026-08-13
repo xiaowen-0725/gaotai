@@ -119,8 +119,10 @@ function runMutant(mutant, source) {
       "./features/support/register-zh.cjs",
       "./node_modules/@cucumber/cucumber/bin/cucumber.js",
       dest,
+      "--config",
+      "scripts/gherkin-cucumber.cjs",
       "--name",
-      mutant.scenario,
+      `^${mutant.scenario}$`,
     ],
     {
       encoding: "utf8",

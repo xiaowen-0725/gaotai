@@ -51,6 +51,15 @@ describe("browser adapter", () => {
     }
     vi.stubGlobal("FileReader", FakeReader);
     await expect(readAsDataUrl({} as Blob)).resolves.toBe("data:text/plain;base64,xx");
+    class EmptyReader {
+      result: string | null = null;
+      onload: (() => void) | null = null;
+      readAsDataURL() {
+        this.onload?.();
+      }
+    }
+    vi.stubGlobal("FileReader", EmptyReader);
+    await expect(readAsDataUrl({} as Blob)).resolves.toBe("");
     await expect(readLocalTextBody({ type: "text/plain", text: async () => "hi" })).resolves.toBe("hi");
     await expect(readLocalTextBody({ type: "image/png", text: async () => "no" })).resolves.toBeUndefined();
   });

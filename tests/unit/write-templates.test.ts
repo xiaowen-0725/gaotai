@@ -37,19 +37,20 @@ describe("write templates", () => {
   });
 
   it("renders 长文 with sections, analysis fallback, and sources", () => {
-    expect(generateWriteContent("长文", [file("甲")], [highlight("摘")])).toEqual({
+    expect(generateWriteContent("长文", [file("甲")], [highlight("摘"), highlight("第二点")])).toEqual({
       title: "关于「甲」的长文",
       body: [
         "## 引言",
         "围绕「甲」展开讨论。",
         "## 分析",
-        "摘录要点：摘",
+        "摘录要点：摘；第二点",
         "## 结论",
         "以上基于所选材料整理而成。",
         "",
         "来源：",
         "- 甲",
         "- 高亮：摘",
+        "- 高亮：第二点",
       ].join("\n"),
     });
     expect(generateWriteContent("长文", [file("甲")], [])).toEqual({
@@ -98,8 +99,17 @@ describe("write templates", () => {
       ].join("\n"),
     });
     const without = generateWriteContent("小红书图文", [file("甲")], []);
+    expect(without).toEqual({
+      title: "甲怎么看",
+      body: [
+        "先记住这一点。",
+        "步骤一：抓住「甲」的核心。",
+        "对比：有材料时更清楚，没有则容易散。",
+        "#甲 #知识管理 #稿台笔记",
+        "建议配图：封面用一句短标题即可",
+      ].join("\n"),
+    });
     expect(without.body).not.toContain("摘一句");
-    expect(without.body).toContain("#甲 #知识管理 #稿台笔记");
   });
 
   it("renders 口播稿 with three points and a highlight or example fallback", () => {

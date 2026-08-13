@@ -1,0 +1,354 @@
+{
+  "limit": 6,
+  "rows": [
+    {
+      "file": "src/domain/classify.ts",
+      "name": "classifyLink",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "linkPreview",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "isImage",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "isAudio",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "isVideo",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "isTextMime",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "localFileBody",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "classifyLocalName",
+      "cc": 5,
+      "crap": 5
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "parsePastedLinks",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "titleFromUrl",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/classify.ts",
+      "name": "cleanWebBody",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/generators.ts",
+      "name": "generateChatAnswer",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/generators.ts",
+      "name": "applyChatEdit",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/generators.ts",
+      "name": "copyDocumentText",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/generators.ts",
+      "name": "highlightTextFromSelection",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/generators.ts",
+      "name": "isReviseQuestion",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/generators.ts",
+      "name": "fakeTranscription",
+      "cc": 4,
+      "crap": 4
+    },
+    {
+      "file": "src/domain/id.ts",
+      "name": "createId",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/share.ts",
+      "name": "sharePath",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/snapshot.ts",
+      "name": "filledSnapshot",
+      "cc": 4,
+      "crap": 4
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "snapshot",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "load",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "reset",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "createBoard",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "renameBoard",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "deleteBoard",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "setCurrentBoard",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "requireBoard",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "ensureBoard",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "addLink",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "addLocalFile",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "addDocument",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "pushFile",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "updateFile",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "requireFile",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "addHighlight",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "toggleHighlight",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "createFolder",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "moveFileToFolder",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "setTranscription",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "startChatTask",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "askChat",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "generateWrite",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "createShare",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "getShare",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "copyFile",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "requireTask",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "selectedSourceFiles",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "selectedHighlightsOn",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "reviseOpenDocument",
+      "cc": 1,
+      "crap": 1
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "replyFromSources",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/store.ts",
+      "name": "attachMediaTranscript",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/write-templates.ts",
+      "name": "topicFrom",
+      "cc": 3,
+      "crap": 3
+    },
+    {
+      "file": "src/domain/write-templates.ts",
+      "name": "writeLongform",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/write-templates.ts",
+      "name": "writeOutline",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/write-templates.ts",
+      "name": "writeXhs",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/write-templates.ts",
+      "name": "writeScript",
+      "cc": 2,
+      "crap": 2
+    },
+    {
+      "file": "src/domain/write-templates.ts",
+      "name": "generateWriteContent",
+      "cc": 1,
+      "crap": 1
+    }
+  ],
+  "over": []
+}

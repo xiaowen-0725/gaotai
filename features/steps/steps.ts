@@ -1125,6 +1125,7 @@ When("一名未登录访客打开该链接", async () => {
 });
 
 Then("访客能看到该文档内容", async () => {
+  await world.guestPage!.goto(world.shareUrl!);
   await expect(world.guestPage!.getByTestId("share-title")).toBeVisible();
   await expect(world.guestPage!.getByTestId("share-body")).not.toHaveText("");
 });

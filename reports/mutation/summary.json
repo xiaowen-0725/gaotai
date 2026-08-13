@@ -1,0 +1,118 @@
+[
+  {
+    "file": "src/domain/classify.ts",
+    "total": 89,
+    "killed": 86,
+    "survived": 3,
+    "noCoverage": 0,
+    "score": 96.63,
+    "by": {
+      "Killed": 86,
+      "Survived": 3
+    }
+  },
+  {
+    "file": "src/domain/share.ts",
+    "total": 2,
+    "killed": 2,
+    "survived": 0,
+    "noCoverage": 0,
+    "score": 100,
+    "by": {
+      "Killed": 2
+    }
+  },
+  {
+    "file": "src/domain/generators.ts",
+    "total": 56,
+    "killed": 55,
+    "survived": 1,
+    "noCoverage": 0,
+    "score": 98.21,
+    "by": {
+      "Killed": 55,
+      "Survived": 1
+    }
+  },
+  {
+    "file": "src/domain/snapshot.ts",
+    "total": 21,
+    "killed": 21,
+    "survived": 0,
+    "noCoverage": 0,
+    "score": 100,
+    "by": {
+      "Killed": 21
+    }
+  },
+  {
+    "file": "src/domain/write-templates.ts",
+    "total": 86,
+    "killed": 85,
+    "survived": 1,
+    "noCoverage": 0,
+    "score": 98.84,
+    "by": {
+      "Killed": 85,
+      "Survived": 1
+    }
+  },
+  {
+    "file": "src/domain/id.ts",
+    "total": 3,
+    "killed": 2,
+    "survived": 1,
+    "noCoverage": 0,
+    "score": 66.67,
+    "by": {
+      "Killed": 2,
+      "Survived": 1
+    }
+  },
+  {
+    "file": "src/domain/store.ts",
+    "total": 256,
+    "killed": 256,
+    "survived": 0,
+    "noCoverage": 0,
+    "score": 100,
+    "by": {
+      "Killed": 256
+    }
+  },
+  {
+    "file": "src/adapters/author-action.ts",
+    "total": 65,
+    "killed": 64,
+    "survived": 1,
+    "noCoverage": 0,
+    "score": 98.46,
+    "by": {
+      "Killed": 64,
+      "Survived": 1
+    }
+  },
+  {
+    "file": "src/adapters/http.ts",
+    "total": 9,
+    "killed": 9,
+    "survived": 0,
+    "noCoverage": 0,
+    "score": 100,
+    "by": {
+      "Killed": 9
+    }
+  },
+  {
+    "file": "src/adapters/browser.ts",
+    "total": 27,
+    "killed": 26,
+    "survived": 1,
+    "noCoverage": 0,
+    "score": 96.3,
+    "by": {
+      "Killed": 26,
+      "Survived": 1
+    }
+  }
+]

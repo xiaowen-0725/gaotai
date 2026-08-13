@@ -1,0 +1,42 @@
+[
+  {
+    "file": "src/domain/classify.ts",
+    "mutant": "mime ?? \"\" → garbage string",
+    "why": "缺 mime 时垃圾 fallback 仍不匹配 image/ audio/ video/，分类结果相同"
+  },
+  {
+    "file": "src/domain/classify.ts",
+    "mutant": "split(/[\\s\\n]+/) → split(/[\\s\\n]/)",
+    "why": "连续空白会多出空 token，filter(Boolean) 丢掉，urls 相同"
+  },
+  {
+    "file": "src/domain/classify.ts",
+    "mutant": "item.trim() → item",
+    "why": "按空白 split 后 token 已无首尾空白"
+  },
+  {
+    "file": "src/domain/generators.ts",
+    "mutant": "file.url || \"\" → garbage string",
+    "why": "url 缺失时垃圾串不含 fail，转录成败不变"
+  },
+  {
+    "file": "src/domain/write-templates.ts",
+    "mutant": "topic.replace(/\\s+/g, \"\") → /\\s/g",
+    "why": "替换成空串时，逐个空白与连续空白结果相同"
+  },
+  {
+    "file": "src/domain/id.ts",
+    "mutant": "toString(36).slice(2, 10) → toString(36)",
+    "why": "只多留 Number.toString(36) 的 0. 前缀；前缀、两段、唯一性不变"
+  },
+  {
+    "file": "src/adapters/author-action.ts",
+    "mutant": "outcome === \"failed\" ? \"failed\" : \"success\" → : \"\"",
+    "why": "空串 force 不是 failed，fakeTranscription 仍走成功分支"
+  },
+  {
+    "file": "src/adapters/browser.ts",
+    "mutant": "navigator.clipboard?.writeText → clipboard.writeText",
+    "why": "后面仍链式 .catch；clipboard 缺失时两种写法都会抛，存在时行为相同"
+  }
+]
