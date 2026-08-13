@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { copyDocumentText, isReviseQuestion } from "@/domain/generators";
-import { filledSnapshot } from "@/domain/snapshot";
+import { DEFAULT_AUTHOR, EMPTY_SNAPSHOT, filledSnapshot } from "@/domain/snapshot";
 import { topicFrom } from "@/domain/write-templates";
 import { canvasMode, composerBoardId, fileViewKind, homeTabAction, questionToAsk } from "@/components/file-view";
 import { showArchivedEmpty, boardsOnTab, boardListClass, toggleClass, switcherName } from "@/components/board-list";
@@ -24,6 +24,40 @@ describe("snapshot and copy helpers", () => {
       currentBoardId: null,
     }).currentBoardId).toBe("b1");
     expect(filledSnapshot({}).boards).toEqual([]);
+  });
+
+  it("keeps the specified default author and empty collections", () => {
+    expect(DEFAULT_AUTHOR).toEqual({ id: "author-1", name: "zhoujw07", plan: "Free" });
+    expect(EMPTY_SNAPSHOT.author).toEqual(DEFAULT_AUTHOR);
+    expect(EMPTY_SNAPSHOT.boards).toEqual([]);
+    expect(EMPTY_SNAPSHOT.folders).toEqual([]);
+    expect(EMPTY_SNAPSHOT.files).toEqual([]);
+    expect(EMPTY_SNAPSHOT.highlights).toEqual([]);
+    expect(EMPTY_SNAPSHOT.tasks).toEqual([]);
+    expect(EMPTY_SNAPSHOT.shareLinks).toEqual([]);
+    expect(EMPTY_SNAPSHOT.currentBoardId).toBeNull();
+    const empty = filledSnapshot({});
+    expect(empty.author).toEqual({ id: "author-1", name: "zhoujw07", plan: "Free" });
+    expect(empty.folders).toEqual([]);
+    expect(empty.files).toEqual([]);
+    expect(empty.highlights).toEqual([]);
+    expect(empty.tasks).toEqual([]);
+    expect(empty.shareLinks).toEqual([]);
+    const store = new GaotaiStore();
+    expect(store.author).toEqual({ id: "author-1", name: "zhoujw07", plan: "Free" });
+    expect(store.snapshot()).toMatchObject({
+      boards: [],
+      folders: [],
+      files: [],
+      highlights: [],
+      tasks: [],
+      shareLinks: [],
+      currentBoardId: null,
+      author: { id: "author-1", name: "zhoujw07", plan: "Free" },
+    });
+    expect(filledSnapshot({
+      author: { id: "other", name: "别的作者", plan: "Pro" },
+    }).author).toEqual({ id: "other", name: "别的作者", plan: "Pro" });
   });
 
   it("copies any document as title plus body", () => {

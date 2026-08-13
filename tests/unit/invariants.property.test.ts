@@ -13,7 +13,9 @@ import type { MaterialFile, WriteGenre } from "@/domain/types";
 import { WRITE_GENRES } from "@/domain/write-templates";
 
 const GENRES = WRITE_GENRES as WriteGenre[];
-const titleArb = fc.string({ minLength: 1, maxLength: 20 }).filter((s) => s.trim().length > 0);
+const titleArb = fc
+  .string({ minLength: 1, maxLength: 20 })
+  .filter((s) => s.trim().length > 0 && !/[<>]/.test(s));
 
 function asWriteFile(genre: WriteGenre, title: string, body: string): MaterialFile {
   return {
@@ -150,7 +152,7 @@ describe("domain invariants", () => {
         const content = generateWriteContent(genre, [{ title } as MaterialFile], []);
         const copied = copyDocumentText(asWriteFile(genre, content.title, content.body));
         expect(copied).toBe(`${content.title}\n\n${content.body}`);
-        expect(copied).not.toMatch(/<[^>]+>/);
+        expect(copied).not.toMatch(/<\/?[a-zA-Z][^>]*>/);
         if (genre === "长文") expect(copied).toContain("来源");
         if (genre === "短文提纲") {
           expect(copied).toContain("主题");

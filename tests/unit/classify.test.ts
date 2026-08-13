@@ -19,12 +19,19 @@ describe("classify", () => {
 
   it("classifies local names by mime or extension", () => {
     expect(classifyLocalName("a.png", "image/png")).toBe("image");
+    expect(classifyLocalName("notes.txt", "image/png")).toBe("image");
+    expect(classifyLocalName("notes.txt", "IMAGE/PNG")).toBe("image");
     expect(classifyLocalName("shot.JPG")).toBe("image");
     expect(classifyLocalName("voice.mp3")).toBe("audio");
+    expect(classifyLocalName("notes.txt", "audio/mpeg")).toBe("audio");
     expect(classifyLocalName("clip.wav", "audio/wav")).toBe("audio");
     expect(classifyLocalName("movie.mp4")).toBe("video");
+    expect(classifyLocalName("notes.txt", "video/mp4")).toBe("video");
     expect(classifyLocalName("notes.txt")).toBe("document");
     expect(classifyLocalName("notes.txt", "text/plain")).toBe("document");
+    expect(classifyLocalName("shot.png.bak")).toBe("document");
+    expect(classifyLocalName("voice.mp3.bak")).toBe("document");
+    expect(classifyLocalName("movie.mp4.bak")).toBe("document");
     expect(localFileBody("notes.txt", "document")).toBe("本地文档：notes.txt");
     expect(localFileBody("shot.png", "image")).toBe("");
     expect(localFileBody("notes.txt", "document", "hello")).toBe("hello");
@@ -43,8 +50,15 @@ describe("classify", () => {
 
   it("derives a host title and clean web body", () => {
     expect(titleFromUrl("https://www.example.com/path")).toBe("example.com");
+    expect(titleFromUrl("https://foo.www.example.com/x")).toBe("foo.www.example.com");
     expect(titleFromUrl("not-a-url")).toBe("not-a-url");
-    expect(cleanWebBody("https://example.com", "example.com")).toContain("干净阅读正文");
+    expect(cleanWebBody("https://example.com", "example.com")).toBe(
+      [
+        "example.com 的干净阅读正文。",
+        "原文去掉导航、广告与侧栏后，只保留文章主体。",
+        "来源页面：https://example.com",
+      ].join("\n\n"),
+    );
     expect(linkPreview("https://youtu.be/1")).toEqual({
       kind: "youtube",
       title: "YouTube 视频",

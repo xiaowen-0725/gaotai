@@ -8,6 +8,10 @@
     "start": "next start --port 3000",
     "test": "vitest run",
     "test:unit": "vitest run",
+    "test:mutate": "node scripts/mutate-serial.mjs",
+    "test:mutate:file": "node scripts/mutate-file.mjs",
+    "test:gherkin-mutate": "node scripts/gherkin-mutate.mjs",
+    "test:crap": "node scripts/crap-domain.mjs",
     "acceptance": "node scripts/acceptance.mjs"
   },
   "dependencies": {
@@ -18,6 +22,8 @@
   "devDependencies": {
     "@cucumber/cucumber": "^11.2.0",
     "@playwright/test": "^1.49.1",
+    "@stryker-mutator/core": "^8.7.1",
+    "@stryker-mutator/vitest-runner": "^8.7.1",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

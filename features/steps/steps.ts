@@ -442,9 +442,11 @@ When("作者点击 globe", async () => {
 });
 
 Then("该入口存在", async () => {
-  const globe = await world.page.getByTestId("seg-globe").count();
-  const sprite = await world.page.getByTestId("nav-sprite").count();
-  expect(globe + sprite).toBeGreaterThan(0);
+  if (world.page.url().includes("/boards/")) {
+    await expect(world.page.getByTestId("seg-globe")).toBeVisible();
+  } else {
+    await expect(world.page.getByTestId("nav-sprite")).toBeVisible();
+  }
 });
 
 Then("V1 显示未开放", async () => {
@@ -468,7 +470,7 @@ When("作者粘贴至少一条链接并上传至少一个本地文件", async ()
 });
 
 Then("可见进度 Adding materials… \\(n\\/m\\)", async () => {
-  await expect(world.page.getByTestId("add-progress")).toContainText("Adding materials…");
+  await expect(world.page.getByTestId("add-progress")).toHaveText(/Adding materials… \(\d+\/\d+\)/);
 });
 
 Then("这些条目出现在 Your files", async () => {
@@ -1224,7 +1226,10 @@ When("作者分别点击 Create image、Create slides、Create video、Build web
 });
 
 Then("这些入口都存在", async () => {
-  await expect(world.page.getByTestId("tab-Image")).toBeVisible();
+  for (const name of ["Image", "Slides", "Video", "Webpage"]) {
+    await expect(world.page.getByTestId(`tab-${name}`)).toBeVisible();
+  }
+  await expect(world.page.getByTestId("btn-cube")).toBeVisible();
 });
 
 Then("不能完成出图、幻灯片、视频或网页搭建", async () => {

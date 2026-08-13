@@ -6,3 +6,9 @@ node_modules
 playwright-report
 test-results
 *.log
+.stryker-tmp
+reports/mutation/html
+reports/mutation/index.html
+reports/mutation/events
+features/.gherkin-mutants
+reports/gherkin-mutants/*.feature
