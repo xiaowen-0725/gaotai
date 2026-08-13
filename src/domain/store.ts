@@ -1,13 +1,14 @@
 import { createId } from "./id";
 import {
   applyChatEdit,
-  classifyLink,
-  classifyLocalName,
   copyDocumentText,
   fakeTranscription,
   generateChatAnswer,
   generateWriteContent,
+  isReviseQuestion,
 } from "./generators";
+import { classifyLocalName, linkPreview, localFileBody } from "./classify";
+import { DEFAULT_AUTHOR, filledSnapshot } from "./snapshot";
 import type {
   Author,
   Board,
@@ -20,12 +21,6 @@ import type {
   Task,
   WriteGenre,
 } from "./types";
-
-const DEFAULT_AUTHOR: Author = {
-  id: "author-1",
-  name: "zhoujw07",
-  plan: "Free",
-};
 
 export class GaotaiStore {
   boards: Board[] = [];
@@ -51,14 +46,15 @@ export class GaotaiStore {
   }
 
   load(data: Partial<StoreSnapshot>) {
-    this.boards = data.boards ?? [];
-    this.folders = data.folders ?? [];
-    this.files = data.files ?? [];
-    this.highlights = data.highlights ?? [];
-    this.tasks = data.tasks ?? [];
-    this.shareLinks = data.shareLinks ?? [];
-    this.currentBoardId = data.currentBoardId ?? this.boards[0]?.id ?? null;
-    this.author = data.author ?? { ...DEFAULT_AUTHOR };
+    const next = filledSnapshot(data);
+    this.boards = next.boards;
+    this.folders = next.folders;
+    this.files = next.files;
+    this.highlights = next.highlights;
+    this.tasks = next.tasks;
+    this.shareLinks = next.shareLinks;
+    this.currentBoardId = next.currentBoardId;
+    this.author = next.author;
   }
 
   reset() {
@@ -117,19 +113,8 @@ export class GaotaiStore {
   }
 
   addLink(boardId: string, url: string): MaterialFile {
-    const kind = classifyLink(url);
-    const title = kind === "youtube" ? "YouTube 视频" : this.titleFromUrl(url);
-    const body =
-      kind === "youtube"
-        ? `YouTube 来源：${url}`
-        : this.cleanWebBody(url, title);
-    return this.pushFile({
-      boardId,
-      kind,
-      title,
-      body,
-      url,
-    });
+    const preview = linkPreview(url);
+    return this.pushFile({ boardId, ...preview, url });
   }
 
   addLocalFile(
@@ -142,23 +127,15 @@ export class GaotaiStore {
       boardId,
       kind,
       title: name,
-      body: options.body ?? (kind === "document" ? `本地文档：${name}` : ""),
+      body: localFileBody(name, kind, options.body),
       mime: options.mime,
       dataUrl: options.dataUrl,
     });
-    if (kind === "audio" || kind === "video") {
-      file.transcription = fakeTranscription(file);
-    }
-    return file;
+    return attachMediaTranscript(file);
   }
 
   addDocument(boardId: string, title = "未命名文档", body = ""): MaterialFile {
-    return this.pushFile({
-      boardId,
-      kind: "document",
-      title,
-      body,
-    });
+    return this.pushFile({ boardId, kind: "document", title, body });
   }
 
   private pushFile(partial: {
@@ -188,10 +165,7 @@ export class GaotaiStore {
 
   updateFile(id: string, patch: Partial<Pick<MaterialFile, "title" | "body" | "selected" | "folderId">>) {
     const file = this.requireFile(id);
-    if (patch.title !== undefined) file.title = patch.title;
-    if (patch.body !== undefined) file.body = patch.body;
-    if (patch.selected !== undefined) file.selected = patch.selected;
-    if (patch.folderId !== undefined) file.folderId = patch.folderId;
+    assignDefined(file, patch);
     return file;
   }
 
@@ -256,56 +230,17 @@ export class GaotaiStore {
   }
 
   askChat(taskId: string, question: string, currentFileId?: string): ChatMessage {
-    const task = this.tasks.find((t) => t.id === taskId);
-    if (!task) throw new Error("Task 不存在");
-    const user: ChatMessage = { id: createId("msg"), role: "user", text: question };
-    task.messages.push(user);
-
-    const selectedFiles = this.files.filter((f) => f.boardId === task.boardId && f.selected);
-    const selectedHighlights = this.highlights.filter(
-      (h) => h.boardId === task.boardId && h.selected,
-    );
-
-    if (currentFileId && /修改|改一下|更新/.test(question)) {
-      const current = this.requireFile(currentFileId);
-      const beforeCount = this.files.filter((f) => f.boardId === task.boardId).length;
-      applyChatEdit(current, question);
-      current.body = applyChatEdit(current, question).body;
-      const afterCount = this.files.filter((f) => f.boardId === task.boardId).length;
-      if (afterCount !== beforeCount) {
-        throw new Error("继续编辑不应另存");
-      }
-      const assistant: ChatMessage = {
-        id: createId("msg"),
-        role: "assistant",
-        text: `已更新当前文档「${current.title}」，没有另存。`,
-        ranForSeconds: 3,
-        citedFileIds: [current.id],
-      };
-      task.messages.push(assistant);
-      return assistant;
+    const task = this.requireTask(taskId);
+    task.messages.push({ id: createId("msg"), role: "user", text: question });
+    if (currentFileId && isReviseQuestion(question)) {
+      return this.reviseOpenDocument(task, question, currentFileId);
     }
-
-    const answer = generateChatAnswer(question, selectedFiles, selectedHighlights);
-    const assistant: ChatMessage = {
-      id: createId("msg"),
-      role: "assistant",
-      text: answer.text,
-      ranForSeconds: 5,
-      citedFileIds: answer.citedFileIds,
-      citedHighlightIds: answer.citedHighlightIds,
-    };
-    task.messages.push(assistant);
-    return assistant;
+    return this.replyFromSources(task, question);
   }
 
   generateWrite(boardId: string, genre: WriteGenre): MaterialFile {
-    const selectedFiles = this.files.filter(
-      (f) => f.boardId === boardId && f.selected && f.kind !== "write",
-    );
-    const selectedHighlights = this.highlights.filter(
-      (h) => h.boardId === boardId && h.selected,
-    );
+    const selectedFiles = this.selectedSourceFiles(boardId);
+    const selectedHighlights = this.selectedHighlightsOn(boardId);
     const content = generateWriteContent(genre, selectedFiles, selectedHighlights);
     const file = this.pushFile({
       boardId,
@@ -353,20 +288,65 @@ export class GaotaiStore {
     return copyDocumentText(this.requireFile(fileId));
   }
 
-  private titleFromUrl(url: string): string {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, "");
-      return host;
-    } catch {
-      return url;
-    }
+  private requireTask(id: string): Task {
+    const task = this.tasks.find((t) => t.id === id);
+    if (!task) throw new Error("Task 不存在");
+    return task;
   }
 
-  private cleanWebBody(url: string, title: string): string {
-    return [
-      `${title} 的干净阅读正文。`,
-      `原文去掉导航、广告与侧栏后，只保留文章主体。`,
-      `来源页面：${url}`,
-    ].join("\n\n");
+  private selectedSourceFiles(boardId: string) {
+    return this.files.filter((f) => f.boardId === boardId && f.selected && f.kind !== "write");
   }
+
+  private selectedHighlightsOn(boardId: string) {
+    return this.highlights.filter((h) => h.boardId === boardId && h.selected);
+  }
+
+  private reviseOpenDocument(task: Task, question: string, currentFileId: string): ChatMessage {
+    const current = this.requireFile(currentFileId);
+    current.body = applyChatEdit(current, question).body;
+    const assistant: ChatMessage = {
+      id: createId("msg"),
+      role: "assistant",
+      text: `已更新当前文档「${current.title}」，没有另存。`,
+      ranForSeconds: 3,
+      citedFileIds: [current.id],
+    };
+    task.messages.push(assistant);
+    return assistant;
+  }
+
+  private replyFromSources(task: Task, question: string): ChatMessage {
+    const answer = generateChatAnswer(
+      question,
+      this.files.filter((f) => f.boardId === task.boardId && f.selected),
+      this.highlights.filter((h) => h.boardId === task.boardId && h.selected),
+    );
+    const assistant: ChatMessage = {
+      id: createId("msg"),
+      role: "assistant",
+      text: answer.text,
+      ranForSeconds: 5,
+      citedFileIds: answer.citedFileIds,
+      citedHighlightIds: answer.citedHighlightIds,
+    };
+    task.messages.push(assistant);
+    return assistant;
+  }
+}
+
+function attachMediaTranscript(file: MaterialFile) {
+  if (file.kind === "audio" || file.kind === "video") {
+    file.transcription = fakeTranscription(file);
+  }
+  return file;
+}
+
+function assignDefined<T extends object>(target: T, patch: Partial<T>) {
+  (Object.keys(patch) as (keyof T)[]).forEach((key) => {
+    const value = patch[key];
+    if (value !== undefined) {
+      target[key] = value as T[keyof T];
+    }
+  });
 }

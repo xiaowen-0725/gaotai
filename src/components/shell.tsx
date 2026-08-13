@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { switcherName, toggleClass } from "./board-list";
 import { closedStub, useStore } from "./store-context";
 import {
   IconBoards,
@@ -17,7 +18,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { state, act, showToast } = useStore();
   const router = useRouter();
   const pathname = usePathname();
-  const [switchOpen, setSwitchOpen] = useState(false);
   const current = state.boards.find((b) => b.id === state.currentBoardId);
 
   return (
@@ -25,21 +25,21 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <aside className="sidebar" data-testid="global-sidebar">
         <div className="brand" data-testid="brand">稿台</div>
         <button
-          className={`nav-item ${pathname === "/" ? "active" : ""}`}
+          className={toggleClass("nav-item", pathname === "/")}
           data-testid="nav-new-task"
           onClick={() => router.push("/")}
         >
           <IconPlus /> New task
         </button>
         <button
-          className={`nav-item ${pathname.startsWith("/boards") ? "active" : ""}`}
+          className={toggleClass("nav-item", pathname.startsWith("/boards"))}
           data-testid="nav-boards"
           onClick={() => router.push("/boards")}
         >
           <IconBoards /> Boards
         </button>
         <button
-          className={`nav-item ${pathname.startsWith("/skills") ? "active" : ""}`}
+          className={toggleClass("nav-item", pathname.startsWith("/skills"))}
           data-testid="nav-skills"
           onClick={() => router.push("/skills")}
         >
@@ -60,7 +60,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           {state.boards.slice(0, 6).map((b) => (
             <button
               key={b.id}
-              className={`recent-item ${b.id === state.currentBoardId ? "active" : ""}`}
+              className={toggleClass("recent-item", b.id === state.currentBoardId)}
               onClick={() => {
                 void act("setCurrentBoard", { id: b.id });
                 router.push(`/boards/${b.id}`);
@@ -86,30 +86,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <div className="main">
         <div className="main-inner">
           <div className="topbar">
-            <div style={{ position: "relative" }}>
-              <button
-                className="board-switcher"
-                data-testid="board-switcher"
-                onClick={() => setSwitchOpen((v) => !v)}
-              >
-                {current ? current.name : "选择 Board"}
-              </button>
-              {switchOpen ? (
-                <div className="switcher-menu" data-testid="board-switcher-menu">
-                  {state.boards.map((b) => (
-                    <button
-                      key={b.id}
-                      onClick={() => {
-                        void act("setCurrentBoard", { id: b.id });
-                        setSwitchOpen(false);
-                      }}
-                    >
-                      {b.name}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
+            <BoardSwitcher currentName={switcherName(current)} boards={state.boards} onPick={(id) => void act("setCurrentBoard", { id })} />
             <div className="credits" data-testid="credits">
               <IconBolt /> 300
             </div>
@@ -117,6 +94,51 @@ export function Shell({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </div>
+    </div>
+  );
+}
+
+function BoardSwitcher({
+  currentName,
+  boards,
+  onPick,
+}: {
+  currentName: string;
+  boards: { id: string; name: string }[];
+  onPick: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        className="board-switcher"
+        data-testid="board-switcher"
+        onClick={() => setOpen((v) => !v)}
+      >
+        {currentName}
+      </button>
+      <SwitcherMenu open={open} boards={boards} onPick={(id) => { onPick(id); setOpen(false); }} />
+    </div>
+  );
+}
+
+function SwitcherMenu({
+  open,
+  boards,
+  onPick,
+}: {
+  open: boolean;
+  boards: { id: string; name: string }[];
+  onPick: (id: string) => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="switcher-menu" data-testid="board-switcher-menu">
+      {boards.map((b) => (
+        <button key={b.id} onClick={() => onPick(b.id)}>
+          {b.name}
+        </button>
+      ))}
     </div>
   );
 }
