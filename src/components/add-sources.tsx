@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { parsePastedLinks } from "@/domain/classify";
-import { materialsProgress, sourceBatch } from "./source-batch";
+import { materialsProgress, sourceBatch, textUploadBody } from "./source-batch";
 import { useStore } from "./store-context";
 
 export function AddSources({ boardId, onClose }: { boardId: string; onClose: () => void }) {
@@ -97,7 +97,7 @@ async function addLocalBatch(
       name: file.name,
       mime: file.type,
       dataUrl,
-      body: file.type.startsWith("text/") ? await file.text() : undefined,
+      body: await textUploadBody(file),
     });
     done += 1;
     setProgress(materialsProgress(done, total));
