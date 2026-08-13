@@ -1,0 +1,116 @@
+{
+  "source": "features/gaotai-v1.feature",
+  "sourceHash": "a8b5078a2a36412b8c499cd875ce830506764466275a5725d5689cb521072275",
+  "killed": 12,
+  "survived": 0,
+  "results": [
+    {
+      "id": "home-hero-literal",
+      "scenario": "打开应用落在 New task 而非 Board 列表",
+      "from": "而且 中央可见 \"What can I do for you?\"",
+      "to": "而且 中央可见 \"What can I do for them?\"",
+      "status": "killed",
+      "exit": 1,
+      "output": "       locator.waitFor: Timeout 15000ms exceeded.\n       Call log:\n         - waiting for getByText('What can I do for them?').first() to be visible\n\n           at visible (/workspace/features/steps/steps.ts:69:44)\n           at World.<anonymous> (/workspace/features/steps/steps.ts:107:9)\n   - 而且不是 Board 列表页 # features/steps/steps.ts:110\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n5 steps (1 failed, 1 skipped, 3 passed)\n0m15.475s (executing steps: 0m15.389s)"
+    },
+    {
+      "id": "home-not-boards-swapped",
+      "scenario": "打开应用落在 New task 而非 Board 列表",
+      "from": "而且 不是 Board 列表页",
+      "to": "而且 标题为 Boards",
+      "status": "killed",
+      "exit": 1,
+      "output": "           14 × locator resolved to <h1 data-testid=\"home-prompt\">What can I do for you?</h1>\n              - unexpected value \"What can I do for you?\"\n\n           at captureRawStack (/workspace/node_modules/playwright-core/lib/coreBundle.js:9681:17)\n           at callMatcherAsStep (/workspace/node_modules/playwright/lib/matchers/expect.js:13310:57)\n           at Object.toHaveText (/workspace/node_modules/playwright/lib/matchers/expect.js:13300:23)\n           at World.<anonymous> (/workspace/features/steps/steps.ts:265:42)\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n5 steps (1 failed, 4 passed)\n0m05.479s (executing steps: 0m05.382s)"
+    },
+    {
+      "id": "composer-placeholder-literal",
+      "scenario": "New task 提问框与页签可见",
+      "from": "那么 提问框占位为 \"Describe a task or ask anything\"",
+      "to": "那么 提问框占位为 \"Ask me anything\"",
+      "status": "killed",
+      "exit": 1,
+      "output": "\n           at captureRawStack (/workspace/node_modules/playwright-core/lib/coreBundle.js:9681:17)\n           at callMatcherAsStep (/workspace/node_modules/playwright/lib/matchers/expect.js:13310:57)\n           at Object.toBeVisible (/workspace/node_modules/playwright/lib/matchers/expect.js:13300:23)\n           at World.<anonymous> (/workspace/features/steps/steps.ts:140:49)\n   - 而且可见 +、cube、Auto、mic、提交 # features/steps/steps.ts:143\n   - 而且下方可见 For you、Research、Write、Image、Slides、Video、Webpage 与 Browse all # features/steps/steps.ts:151\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n5 steps (1 failed, 2 skipped, 2 passed)\n0m05.494s (executing steps: 0m05.405s)"
+    },
+    {
+      "id": "empty-tasks-literal",
+      "scenario": "Tasks 空状态为 Nothing here",
+      "from": "而且 空状态为 \"Nothing here\"",
+      "to": "而且 空状态为 \"Something here\"",
+      "status": "killed",
+      "exit": 1,
+      "output": "   ✖ 而且空状态为 \"Something here\" # features/steps/steps.ts:389\n       locator.waitFor: Timeout 15000ms exceeded.\n       Call log:\n         - waiting for getByText('Something here').first() to be visible\n\n           at visible (/workspace/features/steps/steps.ts:69:44)\n           at World.<anonymous> (/workspace/features/steps/steps.ts:390:9)\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n4 steps (1 failed, 3 passed)\n0m15.621s (executing steps: 0m15.529s)"
+    },
+    {
+      "id": "plus-menu-literal",
+      "scenario": "加号打开添加菜单",
+      "from": "那么 可见 Add from files、从稿台已有 file 加入、Use browser 开关、Add connectors",
+      "to": "那么 可见 Add from files、从别处加入、Use browser 开关、Add connectors",
+      "status": "killed",
+      "exit": 1,
+      "output": "       Undefined. Implement with the following snippet:\n\n         Then('可见 Add from files、从别处加入、Use browser 开关、Add connectors', function () {\n           // Write code here that turns the phrase above into concrete actions\n           return 'pending';\n         });\n\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 undefined)\n4 steps (1 undefined, 3 passed)\n0m00.500s (executing steps: 0m00.413s)"
+    },
+    {
+      "id": "no-board-guard-inverted",
+      "scenario": "无当前 Board 时须先创建或选择才能继续 New task",
+      "from": "那么 须先创建或选择一个 Board 才能继续",
+      "to": "那么 可以开始 Board 内 Chat",
+      "status": "killed",
+      "exit": 1,
+      "output": "         - waiting for getByTestId('chat-pane')\n\n           at captureRawStack (/workspace/node_modules/playwright-core/lib/coreBundle.js:9681:17)\n           at callMatcherAsStep (/workspace/node_modules/playwright/lib/matchers/expect.js:13310:57)\n           at Object.toBeVisible (/workspace/node_modules/playwright/lib/matchers/expect.js:13300:23)\n           at World.<anonymous> (/workspace/features/steps/steps.ts:749:53)\n   - 而且顶栏显示当前 Board # features/steps/steps.ts:172\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n5 steps (1 failed, 1 skipped, 3 passed)\n0m05.542s (executing steps: 0m05.459s)"
+    },
+    {
+      "id": "create-menu-genres-swapped",
+      "scenario": "Create 菜单没有四种体裁按钮",
+      "from": "那么 菜单上没有「长文」「短文提纲」「小红书图文」「口播稿」四个按钮",
+      "to": "那么 可见四种中文模板名：长文、短文提纲、小红书图文、口播稿",
+      "status": "killed",
+      "exit": 1,
+      "output": "         - waiting for getByTestId('write-dialog').getByText('长文')\n\n           at captureRawStack (/workspace/node_modules/playwright-core/lib/coreBundle.js:9681:17)\n           at callMatcherAsStep (/workspace/node_modules/playwright/lib/matchers/expect.js:13310:57)\n           at Object.toBeVisible (/workspace/node_modules/playwright/lib/matchers/expect.js:13300:23)\n           at World.<anonymous> (/workspace/features/steps/steps.ts:773:74)\n   - 而且体裁选择只出现在 Write 流程内 # features/steps/steps.ts:241\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n4 steps (1 failed, 1 skipped, 2 passed)\n0m05.514s (executing steps: 0m05.442s)"
+    },
+    {
+      "id": "longform-outcome-swapped",
+      "scenario": "按长文模板生成独立文档",
+      "from": "那么 Files 中出现一篇独立文档：标题、连续分段正文、可见来源",
+      "to": "那么 Files 中出现一篇独立文档：主题加分层条目，条目可有一句「这段写什么」",
+      "status": "killed",
+      "exit": 1,
+      "output": "       - 高亮：组织知识\"\n\n           at captureRawStack (/workspace/node_modules/playwright-core/lib/coreBundle.js:9681:17)\n           at callMatcherAsStep (/workspace/node_modules/playwright/lib/matchers/expect.js:13310:57)\n           at Object.toHaveValue (/workspace/node_modules/playwright/lib/matchers/expect.js:13300:23)\n           at World.<anonymous> (/workspace/features/steps/steps.ts:819:52)\n   - 而且Tasks 中可以有对应这次 Write 的 task # features/steps/steps.ts:807\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n5 steps (1 failed, 1 skipped, 3 passed)\n0m05.591s (executing steps: 0m05.499s)"
+    },
+    {
+      "id": "unchecked-source-negated",
+      "scenario": "未勾选 file 不出现在该文档来源中",
+      "from": "而且 该文档来源中不可见 file 乙",
+      "to": "而且 该文档来源中可见 file 乙",
+      "status": "killed",
+      "exit": 1,
+      "output": "       Undefined. Implement with the following snippet:\n\n         Then('该文档来源中可见 file 乙', function () {\n           // Write code here that turns the phrase above into concrete actions\n           return 'pending';\n         });\n\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 undefined)\n5 steps (1 undefined, 4 passed)\n0m00.684s (executing steps: 0m00.593s)"
+    },
+    {
+      "id": "guest-readonly-swapped",
+      "scenario": "未登录访客只读且看不到 Board 其余内容",
+      "from": "而且 访客不能编辑",
+      "to": "而且 标题与正文可编辑",
+      "status": "killed",
+      "exit": 1,
+      "output": "   ✖ 而且标题与正文可编辑 # features/steps/steps.ts:526\n       locator.fill: Timeout 30000ms exceeded.\n       Call log:\n         - waiting for getByTestId('doc-title')\n\n           at World.<anonymous> (/workspace/features/steps/steps.ts:527:45)\n   - 而且访客看不到该 Board 的其他 file、Chat、以及其他文档 # features/steps/steps.ts:1137\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n6 steps (1 failed, 1 skipped, 4 passed)\n0m30.882s (executing steps: 0m30.795s)"
+    },
+    {
+      "id": "deleted-board-outcome-swapped",
+      "scenario": "删除自己的 Board 后列表消失",
+      "from": "那么 该 Board 从列表中消失",
+      "to": "那么 出现一个可打开的 Board",
+      "status": "killed",
+      "exit": 1,
+      "output": "   ✔ 当作者删除该 Board # features/steps/steps.ts:329\n   ✖ 那么出现一个可打开的 Board # features/steps/steps.ts:287\n       locator.waitFor: Timeout 30000ms exceeded.\n       Call log:\n         - waiting for getByTestId('board-workspace') to be visible\n\n           at World.<anonymous> (/workspace/features/steps/steps.ts:288:51)\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n4 steps (1 failed, 3 passed)\n0m30.528s (executing steps: 0m30.435s)"
+    },
+    {
+      "id": "share-invalid-negated",
+      "scenario": "删除 Board 后分享链接失效且无撤销分享按钮",
+      "from": "而且 访客再打开原链接时打不开该文档",
+      "to": "而且 访客能看到该文档内容",
+      "status": "killed",
+      "exit": 1,
+      "output": "         - waiting for getByTestId('share-title')\n\n           at captureRawStack (/workspace/node_modules/playwright-core/lib/coreBundle.js:9681:17)\n           at callMatcherAsStep (/workspace/node_modules/playwright/lib/matchers/expect.js:13310:57)\n           at Object.toBeVisible (/workspace/node_modules/playwright/lib/matchers/expect.js:13300:23)\n           at World.<anonymous> (/workspace/features/steps/steps.ts:1129:61)\n   - 而且界面没有单独的撤销 Share 按钮 # features/steps/steps.ts:1163\n   ✔ After # features/steps/steps.ts:86\n\n1 scenario (1 failed)\n6 steps (1 failed, 1 skipped, 4 passed)\n0m06.462s (executing steps: 0m06.374s)"
+    }
+  ]
+}
