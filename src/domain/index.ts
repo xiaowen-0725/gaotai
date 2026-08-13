@@ -5,3 +5,4 @@ export * from "./id";
 export * from "./classify";
 export * from "./snapshot";
 export * from "./write-templates";
+export * from "./share";

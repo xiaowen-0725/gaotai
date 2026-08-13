@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { readAsDataUrl, readLocalTextBody } from "@/adapters/browser";
 import { parsePastedLinks } from "@/domain/classify";
-import { materialsProgress, sourceBatch, textUploadBody } from "./source-batch";
+import { materialsProgress, sourceBatch } from "./source-batch";
 import { useStore } from "./store-context";
 
 export function AddSources({ boardId, onClose }: { boardId: string; onClose: () => void }) {
@@ -91,23 +92,16 @@ async function addLocalBatch(
   setProgress: (text: string) => void,
 ) {
   for (const file of files) {
-    const dataUrl = await readFile(file);
+    const dataUrl = await readAsDataUrl(file);
     await act("addLocalFile", {
       boardId,
       name: file.name,
       mime: file.type,
       dataUrl,
-      body: await textUploadBody(file),
+      body: await readLocalTextBody(file),
     });
     done += 1;
     setProgress(materialsProgress(done, total));
   }
 }
 
-function readFile(file: File): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.readAsDataURL(file);
-  });
-}

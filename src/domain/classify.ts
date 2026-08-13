@@ -31,6 +31,10 @@ function isVideo(name: string, mime: string) {
   return mime.startsWith("video/") || VIDEO_EXT.test(name);
 }
 
+export function isTextMime(mime: string) {
+  return mime.startsWith("text/");
+}
+
 export function localFileBody(name: string, kind: FileKind, body?: string) {
   if (body !== undefined) return body;
   return kind === "document" ? `本地文档：${name}` : "";

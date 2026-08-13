@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { runAuthorAction } from "@/adapters/author-action";
+import { clientState } from "@/lib/client-state";
 import { loadStore, withStore } from "@/lib/server-store";
-import { defaultModel, isAuthorLoggedIn } from "@/lib/session";
-import { runAuthorAction } from "./run-action";
+import { isAuthorLoggedIn } from "@/lib/session";
 
 export async function POST(req: Request) {
   if (!isAuthorLoggedIn()) {
@@ -12,13 +13,8 @@ export async function POST(req: Request) {
 
 function authorActionPayload(body: { type: string; payload?: Record<string, unknown> }) {
   const result = withStore((store) => runAuthorAction(store, body.type, body.payload || {}));
-  const store = loadStore();
   return {
     result,
-    state: {
-      ...store.snapshot(),
-      loggedIn: true,
-      defaultModel: defaultModel(),
-    },
+    state: clientState(loadStore(), true),
   };
 }

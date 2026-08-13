@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { getJson, postJson } from "@/adapters/http";
 import type { StoreSnapshot } from "@/domain/types";
 
 export type AppState = StoreSnapshot & {
@@ -36,17 +37,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/state", { cache: "no-store" });
-    if (res.ok) setState(await res.json());
+    const { ok, data } = await getJson<AppState>("/api/state");
+    if (ok) setState(data);
   }, []);
 
   const act = useCallback(async (type: string, payload?: Record<string, unknown>) => {
-    const res = await fetch("/api/action", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, payload }),
-    });
-    const data = await res.json();
+    const data = await postJson<{ result: unknown; state?: AppState }>("/api/action", { type, payload });
     if (data.state) setState(data.state);
     return data.result;
   }, []);

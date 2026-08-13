@@ -5,8 +5,9 @@ import { topicFrom } from "@/domain/write-templates";
 import { canvasMode, composerBoardId, fileViewKind, homeTabAction, questionToAsk } from "@/components/file-view";
 import { showArchivedEmpty, boardsOnTab, boardListClass, toggleClass, switcherName } from "@/components/board-list";
 import { runCreatePick } from "@/components/composer-actions";
-import { materialsProgress, sourceBatch, textUploadBody } from "@/components/source-batch";
-import { runAuthorAction } from "@/app/api/action/run-action";
+import { materialsProgress, sourceBatch } from "@/components/source-batch";
+import { readLocalTextBody } from "@/adapters/browser";
+import { runAuthorAction } from "@/adapters/author-action";
 import { GaotaiStore } from "@/domain/store";
 
 describe("snapshot and copy helpers", () => {
@@ -82,8 +83,8 @@ describe("ui decision helpers", () => {
     expect(materialsProgress(1, 3)).toBe("Adding materials… (1/3)");
     expect(sourceBatch("https://a.com\nhttps://b.com", null).urls).toHaveLength(2);
     expect(sourceBatch("", [{ name: "a.txt" }]).total).toBe(1);
-    await expect(textUploadBody({ type: "text/plain", text: async () => "hi" })).resolves.toBe("hi");
-    await expect(textUploadBody({ type: "image/png", text: async () => "no" })).resolves.toBeUndefined();
+    await expect(readLocalTextBody({ type: "text/plain", text: async () => "hi" })).resolves.toBe("hi");
+    await expect(readLocalTextBody({ type: "image/png", text: async () => "no" })).resolves.toBeUndefined();
   });
 
   it("runs create-menu picks or the stub fallback", () => {

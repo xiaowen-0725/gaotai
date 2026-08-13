@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
+import { clientState } from "@/lib/client-state";
 import { loadStore } from "@/lib/server-store";
-import { defaultModel, isAuthorLoggedIn } from "@/lib/session";
+import { isAuthorLoggedIn } from "@/lib/session";
 
 export async function GET() {
-  const store = loadStore();
-  return NextResponse.json({
-    ...store.snapshot(),
-    loggedIn: isAuthorLoggedIn(),
-    defaultModel: defaultModel(),
-  });
+  return NextResponse.json(clientState(loadStore(), isAuthorLoggedIn()));
 }

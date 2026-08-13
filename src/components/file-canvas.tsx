@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { absoluteShareUrl, rememberCopiedText, selectedText, writeClipboard } from "@/adapters/browser";
+import { highlightTextFromSelection } from "@/domain/generators";
 import type { MaterialFile } from "@/domain/types";
 import { closedStub, useStore } from "./store-context";
 import { fileViewKind } from "./file-view";
@@ -222,16 +224,11 @@ function HighlightList({ highlights }: { highlights: { id: string; text: string;
   );
 }
 
-export function highlightTextFromSelection(file: { body: string; title: string }, selected: string) {
-  return selected || file.body.slice(0, 24) || file.title;
-}
-
 async function highlightCurrentFile(
   act: (type: string, payload: Record<string, unknown>) => Promise<unknown>,
   file: MaterialFile,
 ) {
-  const selected = typeof window !== "undefined" ? window.getSelection()?.toString().trim() ?? "" : "";
-  await act("addHighlight", { fileId: file.id, text: highlightTextFromSelection(file, selected) });
+  await act("addHighlight", { fileId: file.id, text: highlightTextFromSelection(file, selectedText()) });
 }
 
 async function copyCurrentFile(
@@ -240,9 +237,8 @@ async function copyCurrentFile(
   showToast: (msg: string) => void,
 ) {
   const result = (await act("copyFile", { fileId })) as { text: string };
-  await navigator.clipboard?.writeText(result.text).catch(() => undefined);
-  (window as unknown as { __lastCopy?: string }).__lastCopy = result.text;
-  document.body.setAttribute("data-last-copy", result.text);
+  await writeClipboard(result.text);
+  rememberCopiedText(result.text);
   showToast("已复制");
 }
 
@@ -252,9 +248,9 @@ async function shareCurrentFile(
   setShareUrl: (url: string) => void,
 ) {
   const link = (await act("createShare", { fileId })) as { token: string };
-  const url = `${window.location.origin}/share/${link.token}`;
+  const url = absoluteShareUrl(link.token);
   setShareUrl(url);
-  await navigator.clipboard?.writeText(url).catch(() => undefined);
+  await writeClipboard(url);
 }
 
 function SourceNames({ ids }: { ids: string[] }) {

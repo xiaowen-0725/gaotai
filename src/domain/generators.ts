@@ -28,6 +28,10 @@ export function copyDocumentText(file: MaterialFile): string {
   return `${file.title}\n\n${file.body}`;
 }
 
+export function highlightTextFromSelection(file: { body: string; title: string }, selected: string) {
+  return selected || file.body.slice(0, 24) || file.title;
+}
+
 export function isReviseQuestion(question: string) {
   return /修改|改一下|更新/.test(question);
 }

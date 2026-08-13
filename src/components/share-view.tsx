@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getJson } from "@/adapters/http";
 
 export function ShareView({ token }: { token: string }) {
   const [data, setData] = useState<{ title: string; body: string } | null>(null);
@@ -8,12 +9,12 @@ export function ShareView({ token }: { token: string }) {
 
   useEffect(() => {
     void (async () => {
-      const res = await fetch(`/api/share/${token}`, { cache: "no-store" });
-      if (!res.ok) {
+      const { ok, data } = await getJson<{ title: string; body: string }>(`/api/share/${token}`);
+      if (!ok) {
         setError("打不开该文档");
         return;
       }
-      setData(await res.json());
+      setData(data);
     })();
   }, [token]);
 

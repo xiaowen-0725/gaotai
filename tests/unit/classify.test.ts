@@ -4,6 +4,7 @@ import {
   classifyLocalName,
   cleanWebBody,
   linkPreview,
+  isTextMime,
   localFileBody,
   parsePastedLinks,
   titleFromUrl,
@@ -27,6 +28,8 @@ describe("classify", () => {
     expect(localFileBody("notes.txt", "document")).toBe("本地文档：notes.txt");
     expect(localFileBody("shot.png", "image")).toBe("");
     expect(localFileBody("notes.txt", "document", "hello")).toBe("hello");
+    expect(isTextMime("text/plain")).toBe(true);
+    expect(isTextMime("image/png")).toBe(false);
   });
 
   it("parses pasted links with a 50 cap", () => {
